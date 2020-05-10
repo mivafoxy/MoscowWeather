@@ -25,7 +25,7 @@ namespace MoscowWeather.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return View("Index");
         }
 
         public async Task<IActionResult> ShowWeatherArchives(
