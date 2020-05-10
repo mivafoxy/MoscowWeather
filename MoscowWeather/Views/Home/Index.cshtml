@@ -1,0 +1,46 @@
+﻿@*@Model IEnumerable<MoscowWeather.Models.Phone>
+    @{
+        ViewData["Title"] = "Список смартфонов";
+    }
+
+    <!DOCTYPE html>
+
+    <html>
+    <head>
+        <title>Магазин смартфонов</title>
+    </head>
+    <body>
+        <h3>Смартфоны</h3>
+        <table class="table-condensed">
+            <tr>
+                <td>Модель</td>
+                <td>Производитель</td>
+                <td>Цена</td>
+                <td></td>
+            </tr>
+
+            @foreach (var phone in Model)
+            {
+                <tr>
+                    <td>@phone.Name</td>
+                    <td>@phone.Company</td>
+                    <td>@phone.Price</td>
+                    <td><a href="~/Home/Buy/@phone.Id">Купить</a></td>
+                </tr>
+            }
+        </table>
+    </body>
+    </html>*@
+
+@{
+    ViewData["Title"] = "Главное меню";
+}
+
+<!DOCTYPE html>
+<html>
+<body>
+    <a class="btn btn-info" href="~/Home/ShowWeatherArchives">Просмотр погодных архивов</a>
+    <a class="btn btn-info" href="~/Home/LoadNewWeatherAcrchives">Загрузка погодных архивов</a>
+
+</body>
+</html>

@@ -1,0 +1,94 @@
+﻿@using MoscowWeather.Models
+@model WeatherArchviesViewModel
+
+@addTagHelper *, MoscowWeather
+
+@{
+    ViewData["Title"] = "MoscowWeather";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Список погодных условий в Москве за выбранный период</title>
+</head>
+<body>
+    <form method="get">
+        <div class="form-group">
+            <label for="User" class="col-md-2 control-label">Месяц:</label>
+            <div class="col-md-4">
+                <select value="@Model.FilterViewModel.SelectedMonth" asp-for="@Model.FilterViewModel.SelectedMonth" name="month" asp-items="Html.GetEnumSelectList<Months>()" class="form-control"></select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="User" class="col-md-2 control-label">Год:</label>
+            <div class="col-md-4">
+                <input type="text" name="year" value="@Model.FilterViewModel.SelectedYear" class="form-control" required="required" minlength="4" , maxlength="4" , pattern="\d+" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" class="btn btn-primary" formaction="@Url.Action("ShowWeatherArchives", "Home")" />
+            </div>
+        </div>
+    </form>
+    <table class="table">
+        <tr>
+            <td>Дата</td>
+            <td>Время</td>
+            <td>Температура</td>
+            <td>Относительная влажность</td>
+            <td>Td</td>
+            <td>Атмосферное давление</td>
+            <td>Направление ветра</td>
+            <td>Скорость ветра</td>
+            <td>Облачность</td>
+            <td>H</td>
+            <td>Vv</td>
+            <td>Погодные явления</td>
+        </tr>
+        @foreach (var weather in Model.WeatherModels)
+        {
+            <tr>
+                <td>@weather.Date.ToString("dd.MM.yyyy")</td>
+                <td>@weather.Time.ToString("hh':'mm")</td>
+                <td>@weather.Temperature</td>
+                <td>@weather.Humidity</td>
+                <td>@weather.Td</td>
+                <td>@weather.AtmosphericPressure</td>
+                <td>@weather.WindDirection</td>
+                <td>@weather.WindSpeed</td>
+                <td>@weather.Cloudiness</td>
+                <td>@weather.H</td>
+                <td>@weather.Vv</td>
+                <td>@weather.WeatherCondition</td>
+            </tr>
+
+        }
+    </table>
+    @if (Model.PageViewModel.HasPreviousPage)
+    {
+        <a asp-action="ShowWeatherArchives"
+           asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
+           asp-route-month="@(Model.FilterViewModel.SelectedMonth)"
+           asp-route-year="@(Model.FilterViewModel.SelectedYear)"
+           class="btn  btn-outline-dark">
+            <i class="glyphicon glyphicon-chevron-left"></i>
+            Назад
+        </a>
+    }
+    @if (Model.PageViewModel.HasNextPage)
+    {
+        <a asp-action="ShowWeatherArchives"
+           asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+           asp-route-month="@(Model.FilterViewModel.SelectedMonth)"
+           asp-route-year="@(Model.FilterViewModel.SelectedYear)"
+           class="btn btn-outline-dark">
+            Вперед
+            <i class="glyphicon glyphicon-chevron-right"></i>
+        </a>
+    }
+</body>
+</html>

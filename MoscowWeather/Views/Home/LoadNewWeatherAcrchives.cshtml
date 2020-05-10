@@ -1,0 +1,31 @@
+﻿@using MoscowWeather.Models
+@model ExcelFileViewModel
+
+@{
+    ViewData["Title"] = "MoscowWeather";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Загрузка архивов с погодными уловиями в Москве</title>
+</head>
+<body>
+    <h3>Выберите файл для загрузки</h3>
+    <form asp-action="AddFiles" asp-controller="Home" method="post" enctype="multipart/form-data">
+        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <div class="col-md-10">
+                <p>Выберите один или несколько файлов: </p>
+                <input type="file" asp-for="ExcelFiles" multiple />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-10">
+                <input type="submit" value="Загрузить" />
+            </div>
+        </div>
+    </form>
+</body>
+</html>
