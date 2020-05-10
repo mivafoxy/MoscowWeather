@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
+using MoscowWeather.Consts;
 using MoscowWeather.CustomAttributes;
 using MoscowWeather.DbModels;
+using MoscowWeather.Dtos;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System;
@@ -14,9 +16,11 @@ namespace MoscowWeather.Models
 {
     public class ExcelFileViewModel
     {
+        private readonly ViewModelConsts _viewModelConsts = new ViewModelConsts();
+
         [Required(ErrorMessage = "Пожалуйста, выберете файл.")]
         [DataType(DataType.Upload)]
-        [AllowedFileExtension(new string[] { ".xls", ".xlsx" })]
+        [AllowedFileExtension(new string[] { ".xlsx" })]
         public List<IFormFile> ExcelFiles { get; set; } = new List<IFormFile>();
 
         public void ReadFromExcel(MemoryStream excelFileStream, MoscowWeatherContext dbConnection)
@@ -24,39 +28,63 @@ namespace MoscowWeather.Models
             excelFileStream.Position = 0;
             var workBook = new XSSFWorkbook(excelFileStream);
 
-            var rowList = new List<ExcelRowDto>();
+            var excelRowDtos = new List<ExcelRowDto>();
 
             for (var sheetIndex = 0; sheetIndex < workBook.NumberOfSheets; sheetIndex++)
             {
                 var sheet = workBook.GetSheetAt(sheetIndex);
 
-                for (int dataRow = (sheet.FirstRowNum + 5); dataRow <= sheet.LastRowNum; dataRow++)
-                {
-                    var row = sheet.GetRow(dataRow);
-                    if (row is null)
-                        continue;
-                    if (row.Cells.All(d => d.CellType == CellType.Blank))
-                        continue;
-
-                    var rowDto = new ExcelRowDto();
-
-                    for (var cellNum = row.FirstCellNum; cellNum < 12; cellNum++)
-                    {
-                        if (row.GetCell(cellNum) != null)
-                        {
-                            rowDto.RowColumns.Add(row.GetCell(cellNum).ToString().Trim());
-                        }
-                        else
-                        {
-                            rowDto.RowColumns.Add(string.Empty);
-                        }
-                    }
-
-                    rowList.Add(rowDto);
-                }
+                ProcessSheetHeaders(sheet);
+                excelRowDtos.AddRange(GetDataFromRowColumns(sheet));
             }
 
-            ProcessRows(rowList, dbConnection);
+            ProcessRows(excelRowDtos, dbConnection);
+        }
+
+        private void ProcessSheetHeaders(ISheet sheet)
+        {
+            var excelFileDto = new ExcelContentHeaderDto();
+
+            int headerOffset = sheet.FirstRowNum + 2;
+
+            var headerRow = sheet.GetRow(headerOffset);
+            var subHeaderRow = sheet.GetRow(headerOffset + 1);
+
+            if (headerRow is null || headerRow.Cells.All(d => d.CellType == CellType.Blank))
+            {
+                throw new ArgumentNullException("Пустые поля в заголовке документа.");
+            }
+
+            const int headerCellsCount = 12;
+            if (headerRow.LastCellNum != headerCellsCount)
+            {
+                throw new ArgumentException("Количество требуемых полей не соответствует допустимому.");
+            }
+
+            for (int headerCell = headerRow.FirstCellNum; headerCell < headerCellsCount; headerCell++)
+            {
+                var columnName = headerRow.GetCell(headerCell).ToString() ?? string.Empty;
+                columnName += " " + subHeaderRow.GetCell(headerCell).ToString() ?? string.Empty;
+
+                excelFileDto.Headers.Add(columnName.Trim());
+            }
+
+            bool hasCorrectHeaders =
+                excelFileDto.Headers[0] == _viewModelConsts.Date &&
+                excelFileDto.Headers[1] == _viewModelConsts.Time &&
+                excelFileDto.Headers[2] == _viewModelConsts.Temperature &&
+                excelFileDto.Headers[3] == _viewModelConsts.Humidity &&
+                excelFileDto.Headers[4] == _viewModelConsts.Td &&
+                excelFileDto.Headers[5] == _viewModelConsts.AtmosphericPressure &&
+                excelFileDto.Headers[6] == _viewModelConsts.WindDirection &&
+                excelFileDto.Headers[7] == _viewModelConsts.WindSpeed &&
+                excelFileDto.Headers[8] == _viewModelConsts.Cloudiness &&
+                excelFileDto.Headers[9] == _viewModelConsts.H &&
+                excelFileDto.Headers[10] == _viewModelConsts.Vv &&
+                excelFileDto.Headers[11] == _viewModelConsts.WeatherCondition;
+
+            if (!hasCorrectHeaders)
+                throw new ArgumentException("Некорректные поля в файле.");
         }
 
         private void ProcessRows(List<ExcelRowDto> excelRowDtos, MoscowWeatherContext dbConnection)
@@ -102,6 +130,42 @@ namespace MoscowWeather.Models
             }
 
             dbConnection.SaveChanges();
+        }
+
+        private List<ExcelRowDto> GetDataFromRowColumns(ISheet sheet)
+        {
+            var rowDtos = new List<ExcelRowDto>();
+
+            const int cellCount = 12;
+            int dataStartRowNum = (sheet.FirstRowNum + 4);
+
+            for (int dataRow = dataStartRowNum; dataRow <= sheet.LastRowNum; dataRow++)
+            {
+                var row = sheet.GetRow(dataRow);
+
+                var dataRowDto = new ExcelRowDto();
+
+                if (row is null)
+                    continue;
+                if (row.Cells.All(d => d.CellType == CellType.Blank))
+                    continue;
+
+                for (var cellNum = row.FirstCellNum; cellNum < cellCount; cellNum++)
+                {
+                    if (row.GetCell(cellNum) != null)
+                    {
+                        dataRowDto.RowColumns.Add(row.GetCell(cellNum).ToString().Trim());
+                    }
+                    else
+                    {
+                        dataRowDto.RowColumns.Add(string.Empty);
+                    }
+                }
+
+                rowDtos.Add(dataRowDto);
+            }
+
+            return rowDtos;
         }
     }
 }

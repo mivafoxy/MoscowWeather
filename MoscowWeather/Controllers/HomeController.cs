@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -76,17 +77,24 @@ namespace MoscowWeather.Controllers
 
             foreach (var formFile in fileViewModel.ExcelFiles)
             {
-                if (formFile.Length > 0)
+                try
                 {
-                    using (var stream = new MemoryStream())
+                    if (formFile.Length > 0)
                     {
-                        await formFile.CopyToAsync(stream);
-                        fileViewModel.ReadFromExcel(stream, _dbConnection);
+                        using (var stream = new MemoryStream())
+                        {
+                            await formFile.CopyToAsync(stream);
+                            fileViewModel.ReadFromExcel(stream, _dbConnection);
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    ModelState.AddModelError(formFile.FileName, $"{formFile.FileName} : {e.Message}" );
                 }
             }
 
-            return RedirectToAction("LoadNewWeatherAcrchives");
+            return View("LoadNewWeatherAcrchives", fileViewModel);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using MoscowWeather.Consts;
 using MoscowWeather.DbModels;
 using System;
 using System.Collections.Generic;
@@ -43,5 +44,6 @@ namespace MoscowWeather.Models
         public IEnumerable<Weather> WeatherModels { get; set; }
         public PageViewModel PageViewModel { get; set; }
         public FilterViewModel FilterViewModel { get; set; }
+        public ViewModelConsts ViewModelConsts { get; } = new ViewModelConsts();
     }
 }

@@ -36,18 +36,18 @@
     </form>
     <table class="table">
         <tr>
-            <td>Дата</td>
-            <td>Время</td>
-            <td>Температура</td>
-            <td>Относительная влажность</td>
-            <td>Td</td>
-            <td>Атмосферное давление</td>
-            <td>Направление ветра</td>
-            <td>Скорость ветра</td>
-            <td>Облачность</td>
-            <td>H</td>
-            <td>Vv</td>
-            <td>Погодные явления</td>
+            <td>@Model.ViewModelConsts.Date</td>
+            <td>@Model.ViewModelConsts.Time</td>
+            <td>@Model.ViewModelConsts.Temperature</td>
+            <td>@Model.ViewModelConsts.Humidity</td>
+            <td>@Model.ViewModelConsts.Td</td>
+            <td>@Model.ViewModelConsts.AtmosphericPressure</td>
+            <td>@Model.ViewModelConsts.WindDirection</td>
+            <td>@Model.ViewModelConsts.WindSpeed</td>
+            <td>@Model.ViewModelConsts.Cloudiness</td>
+            <td>@Model.ViewModelConsts.H</td>
+            <td>@Model.ViewModelConsts.Vv</td>
+            <td>@Model.ViewModelConsts.WeatherCondition</td>
         </tr>
         @foreach (var weather in Model.WeatherModels)
         {
